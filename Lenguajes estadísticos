@@ -1,0 +1,249 @@
+########################################3#
+#                                        # 
+#            Taller 2                    #
+# Idalia Hernandez L y Marieth Guillen G #
+#                                        #
+##########################################
+
+
+
+###################################
+#          Primer punto           # 
+###################################
+
+# Primero instalamos el paquete gapminder
+install.packages("gapminder")
+library()
+summary(gapminder)
+#########################################
+
+#Cambiar aleatoriamente 5% de los datos por valores no asignados 
+
+# Inciso A
+
+attach(gapminder) # CORRER EL ATTACH PARA PODERACCEDER A LAS VARIABLES SIN NECESIDAD DE LLAMARLAS CON '$'
+
+life =lifeExp
+life[sample(length(life),0.05*length(life))] <- NA
+
+Pop = pop
+Pop[sample(length(Pop),0.05*length(Pop))] <- NA
+
+gdp = gdpPercap
+gdp[sample(length(gdp),0.05*length(gdp))] <- NA
+
+
+# Inciso B
+ 
+#Creamos la data frame con el nuevo archivo gapminder modificado
+
+gapminderMod <- data.frame(
+  gapminder[,1:3],
+  life,
+  Pop,
+  gdp
+  
+)
+
+###############################################
+
+
+#Importar el archivo gapminder modificado en formato “csv”.
+
+write.csv(gapminderMod, "GapminderMod.csv")
+write.table(gapminderMod, file = "GapminderMod.csv", sep = ";")
+
+################################################
+
+# Inciso C
+
+#Graficar el diagrama de dispersíon lifeExp vs pop.
+
+options(scipen = 999 ) # funcion que permite cambiar de notacion cientifica un valor mas redondeado
+plot(x = life, y = Pop, main = "Esperanza de vida vs Población", xlab = "Esperanza de vida", 
+ylab = "Población")
+
+################################################
+
+
+# Inciso D
+
+#Graficar el diagrama de dispersíon gdpPercap vs pop.
+
+plot(x = gdp, y = Pop, main = "Producto interno bruto vs Población", xlab = "Producto interno bruto", 
+ylab = "Población")
+
+################################################
+
+
+# Inciso E
+
+# Graficar diagramas de cajas de la variable gdpPercap
+# Instalamos el paquete dplyr
+install.packages("dplyr")
+library(dplyr)
+boxplot5 <- gapminderMod %>% select(gdp,continent,year) %>% 
+  filter(year >= 1990 & year<=2007)
+boxplot(gdp~continent,data=boxplot5, main = "Producto interno bruto vs continente" , xlab = "Continente", ylab = "Producto interno bruto")
+
+
+###############################
+#        Segundo punto        #   
+###############################
+
+# Cargar dos archivos en formato csv, llamados experimentoA y experimentoB
+# Indicar si la media de los datos es estadisticamente significativa 
+
+
+ExpA <- gapminderMod %>% filter(country == "China") %>% filter(year > 1952)
+ExperimentoA <- ExpA[,5]
+ExpB <- gapminderMod %>% filter(country == "Costa Rica") %>% filter(year > 1952)
+ExperimentoB <- ExpB[,5]
+
+
+# La media de los datos no es estadisticamente significtiva dado que la hipotesis nula 
+# es aceptada, ya que el valor pe es mayor que 0.05.
+t.test(ExperimentoA, ExperimentoB)$p.value
+
+
+# Cargar dos archivos de datos en formato “csv” llamados “Experimento a.csv” y “Experimento b.csv” 
+# Mostrar en pantalla la correlacion.
+
+Experimento.a <- lifeExp
+Experimento.b <- gdpPercap
+
+A <- cor(Experimento.a, Experimento.b, method = "pearson")
+A
+B <- cor(Experimento.a, Experimento.b, method = "spearman")
+B
+
+
+# Cargar dos archivos de datos en formato “csv” 
+# “Experimento a.csv” y “Experimento b.csv” 
+# graficar el diagrama de dispersion y la líınea recta que aproxime los datos calculada
+# por una regresi´on lineal por  minimos cuadrados.
+
+x <- lm(Experimento.a~Experimento.b)
+plot(Pop,lifeExp, xlab = "Población", 
+     ylab = "Esperanza de vida ")
+abline(x, col = "red" )
+
+
+iris
+plot(iris$Sepal.Length~iris$Sepal.Width)
+abline(lm(iris$Sepal.Length~iris$Sepal.Width))
+cor(iris$Sepal.Length,iris$Sepal.Width)
+
+###################################
+#          Tercer punto           # 
+###################################
+
+
+# Graficar las funciones de densidad y distribucion de una distribucion uniforme.
+
+
+
+#DENSIDAD
+#Function to plot the uniform density
+# x: grid of X-axis values (optional)
+# min: lower limit of the distribution (a)
+# max: upper limit of the distribution (b)
+# lwd: line width of the segments of the graph
+# col: color of the segments and points of the graph
+# ...: additional arguments to be passed to the plot function
+
+gu <- function(x, min = 0, max = 1, lwd = 1, col = 1, ...) {
+  
+  # Grid of X-axis values
+  if (missing(x)) {
+    x <- seq(min - 0.5, max + 0.5, 0.01)
+  }
+  
+  if(max < min) {
+    stop("'min' debe ser menor que 'max'")
+  }
+  
+  plot(x, dunif(x, min = min, max = max),
+       xlim = c(min - 0.25, max + 0.25), type = "l",
+       lty = 0, ylab = "f(x)", ...)
+  segments(min, 1/(max - min), max, 1/(max - min), col = col, lwd = lwd)
+  segments(min - 2, 0, min, 0, lwd = lwd, col = col)
+  segments(max, 0, max + 2, 0, lwd = lwd, col = col)
+  points(min, 1/(max - min), pch = 19, col = col)
+  points(max, 1/(max - min), pch = 19, col = col)
+  segments(min, 0, min, 1/(max - min), lty = 2, col = col, lwd = lwd)
+  segments(max, 0, max, 1/(max - min), lty = 2, col = col, lwd = lwd)
+  points(0, min, pch = 21, col = col, bg = "green")
+  points(max, min, pch = 21, col = col, bg = "red")
+}
+
+gu(min = 0, max = 1, lwd = 2, col = 4, main = "Densidad y distribuición de una distribuición de una uniforme")
+
+
+
+# Distribuicion
+
+# valores del eje X
+di <- seq(-0.5, 1.5, 0.01)
+
+# Distribución uniforme entre 0 y 1.
+plot(di, punif(di, min = 0, max = 0), type = "l", main = "Distribuición uniforme",
+     ylab = "F(x)", lwd = 2, col = "purple")
+
+# Equivalente a:
+plot(punif, -0.5, 1.5, type = "l", main = "CDF uniforme",
+     ylab = "F(x)", lwd = 2, col = "pink")
+
+
+
+
+# Graficar la funcion de densidad y distribucion de una distribucion
+# Bernoulli.
+
+# Densidad
+
+m <- 0:1  # Soporte (dominio) de la variable
+Prob_bernu<- dbinom(x=m, size=1, prob=0.5)
+plot(x=m, y = Prob_bernu, 
+     type='h', las=1, lwd=10)
+
+# Distribuición
+
+ac_bernu<- pbinom(m, size=1, prob=0.5)
+plot(x=m, y = ac_bernu, 
+     type='h', las=1, lwd=10)
+
+
+
+# Graficar la funcion de densidad y distribucion de una distribucion
+# Poisson.
+
+# Densidad
+
+I <- 0:30
+lambda <- 4
+prob_pois <- dpois(x=I, lambda = 4)
+plot(prob_pois, type = "h", lwd = 5)
+
+# Distribuición
+
+lambda <- 4
+acumu_pois <- ppois(I, lambda = 4,lower.tail = TRUE, log.p = FALSE)
+plot(acumu_pois, type = "h", lwd = 5)
+
+
+# Graficar la funcion de densidad y distribucion de una distribucion Exponencial.
+
+#Densidad
+
+M <- seq(0,10,0.1)
+Prob_exp <- dexp(M, rate = 4)
+plot(M, Prob_exp , type = "p"
+     , lwd = 2, )
+
+
+#Distribuición
+
+acumu_exp <- pexp(M, rate = 4)
+plot(M, acumu_exp , type = "p" )
+
